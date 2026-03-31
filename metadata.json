@@ -1,0 +1,5 @@
+{
+  "name": "Sema Agri-Pod",
+  "description": "AI-driven localized intelligence for Kenyan farmers, providing personalized audio podcasts for agricultural advice.",
+  "requestFramePermissions": ["microphone"]
+}

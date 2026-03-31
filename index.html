@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sema Agri-Pod | Radio in your Pocket</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Playfair+Display:ital,wght@1,700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #F5F5F7;
+            --card: #FFFFFF;
+            --text: #1D1D1F;
+            --muted: #86868B;
+            --accent: #0071E3;
+            --success: #34C759;
+            --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-serif: 'Playfair Display', serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-sans);
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 480px;
+            background: var(--card);
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.05);
+            transition: transform 0.3s ease;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        h1 {
+            font-family: var(--font-serif);
+            font-size: 32px;
+            margin-bottom: 8px;
+            font-style: italic;
+        }
+
+        p.subtitle {
+            color: var(--muted);
+            font-size: 14px;
+            font-weight: 400;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--muted);
+            margin-bottom: 8px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: 12px;
+            border: 1px solid #D2D2D7;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.2s ease;
+            background: #FBFBFD;
+        }
+
+        input:focus, select:focus {
+            border-color: var(--accent);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        button {
+            width: 100%;
+            padding: 16px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 14px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-top: 12px;
+        }
+
+        button:hover {
+            background: #0077ED;
+            transform: translateY(-1px);
+        }
+
+        button:disabled {
+            background: var(--muted);
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        #result {
+            margin-top: 32px;
+            display: none;
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .player-card {
+            background: #F5F5F7;
+            border-radius: 16px;
+            padding: 24px;
+            text-align: center;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 100px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            background: var(--success);
+            color: white;
+            margin-bottom: 16px;
+        }
+
+        audio {
+            width: 100%;
+            margin-top: 16px;
+        }
+
+        .summary {
+            margin-top: 24px;
+            font-size: 14px;
+            color: var(--text);
+            text-align: left;
+            border-top: 1px solid #D2D2D7;
+            padding-top: 16px;
+        }
+
+        .summary h3 {
+            font-size: 12px;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 8px;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .spinner {
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(0,113,227,0.1);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            vertical-align: middle;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .footer {
+            margin-top: 40px;
+            text-align: center;
+            font-size: 10px;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .footer span {
+            margin: 0 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Sema Agri-Pod</h1>
+            <p class="subtitle">Radio in your pocket. Personalized for your farm.</p>
+        </header>
+
+        <form id="agriForm">
+            <div class="form-group">
+                <label for="crop">What are you growing?</label>
+                <input type="text" id="crop" placeholder="e.g. Maize, Beans, Coffee" required>
+            </div>
+
+            <div class="form-group">
+                <label for="location">Where is your farm?</label>
+                <input type="text" id="location" placeholder="e.g. Eldoret, Nakuru, Rongai" required>
+            </div>
+
+            <div class="grid">
+                <div class="form-group">
+                    <label for="harvestDate">Harvest Date</label>
+                    <input type="date" id="harvestDate" required>
+                </div>
+                <div class="form-group">
+                    <label for="quantity">Quantity (Bags/Kgs)</label>
+                    <input type="text" id="quantity" placeholder="e.g. 50 Bags" required>
+                </div>
+            </div>
+
+            <div class="grid">
+                <div class="form-group">
+                    <label for="storage">Storage Method</label>
+                    <select id="storage">
+                        <option value="Hermetic Bags">Hermetic Bags</option>
+                        <option value="Traditional Granary">Traditional Granary</option>
+                        <option value="Cold Storage">Cold Storage</option>
+                        <option value="Open Air">Open Air</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="moisture">Moisture Level (%)</label>
+                    <input type="number" id="moisture" placeholder="e.g. 13" step="0.1">
+                </div>
+            </div>
+
+            <div class="grid">
+                <div class="form-group">
+                    <label for="intent">Your Goal</label>
+                    <select id="intent">
+                        <option value="Sell Now">Sell Now</option>
+                        <option value="Store for Later">Store for Later</option>
+                        <option value="Home Use">Home Use</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="language">Language</label>
+                    <select id="language">
+                        <option value="English">English</option>
+                        <option value="Swahili">Swahili</option>
+                    </select>
+                </div>
+            </div>
+
+            <button type="submit" id="generateBtn">Generate My Broadcast</button>
+        </form>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <span id="loadingText">Preparing your personalized radio script...</span>
+        </div>
+
+        <div id="result">
+            <div class="player-card">
+                <div class="status-badge">Live Broadcast Ready</div>
+                <p id="broadcastTitle" style="font-weight: 600; margin-bottom: 8px;"></p>
+                <audio id="audioPlayer" controls></audio>
+            </div>
+
+            <div class="summary">
+                <h3>Actionable Advice</h3>
+                <p id="summaryText"></p>
+            </div>
+        </div>
+
+        <div class="footer">
+            Google Cloud <span>|</span> Safaricom <span>|</span> AI Studio
+        </div>
+    </div>
+
+    <script type="module">
+        import { GoogleGenAI, Modality } from "https://esm.run/@google/genai";
+
+        const API_KEY = "process.env.GEMINI_API_KEY"; // Injected by AI Studio
+        const ai = new GoogleGenAI({ apiKey: API_KEY });
+
+        const form = document.getElementById('agriForm');
+        const generateBtn = document.getElementById('generateBtn');
+        const loading = document.getElementById('loading');
+        const loadingText = document.getElementById('loadingText');
+        const result = document.getElementById('result');
+        const audioPlayer = document.getElementById('audioPlayer');
+        const summaryText = document.getElementById('summaryText');
+        const broadcastTitle = document.getElementById('broadcastTitle');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = {
+                crop: document.getElementById('crop').value,
+                location: document.getElementById('location').value,
+                harvestDate: document.getElementById('harvestDate').value,
+                quantity: document.getElementById('quantity').value,
+                storage: document.getElementById('storage').value,
+                moisture: document.getElementById('moisture').value || "Unknown",
+                intent: document.getElementById('intent').value,
+                language: document.getElementById('language').value
+            };
+
+            // Reset UI
+            result.style.display = 'none';
+            loading.style.display = 'block';
+            generateBtn.disabled = true;
+            loadingText.innerText = "Consulting agricultural experts...";
+
+            try {
+                // 1. Generate Script
+                const scriptResponse = await ai.models.generateContent({
+                    model: "gemini-3-flash-preview",
+                    contents: `Generate a radio broadcast script for a Kenyan farmer. 
+                    Crop: ${formData.crop}
+                    Location: ${formData.location}
+                    Harvest Date: ${formData.harvestDate}
+                    Quantity: ${formData.quantity}
+                    Storage: ${formData.storage}
+                    Moisture: ${formData.moisture}%
+                    Goal: ${formData.intent}
+                    Language: ${formData.language}
+
+                    The script should be conversational, friendly, and sound like a professional radio presenter (like a Safaricom M-Agri broadcast). 
+                    If language is Swahili, use Sheng/Swahili mix common in Kenya. 
+                    If English, use a warm Kenyan tone.
+                    Include specific advice on storage and market timing for ${formData.location}.
+                    Format the output as JSON: { "title": "...", "script": "...", "summary": "..." }`,
+                    config: {
+                        responseMimeType: "application/json"
+                    }
+                });
+
+                const data = JSON.parse(scriptResponse.text);
+                broadcastTitle.innerText = data.title;
+                summaryText.innerText = data.summary;
+
+                // 2. Generate Audio
+                loadingText.innerText = "Synthesizing your localized broadcast...";
+                
+                const ttsResponse = await ai.models.generateContent({
+                    model: "gemini-2.5-flash-preview-tts",
+                    contents: [{ parts: [{ text: `Say this in a warm, professional radio presenter voice: ${data.script}` }] }],
+                    config: {
+                        responseModalities: [Modality.AUDIO],
+                        speechConfig: {
+                            voiceConfig: {
+                                prebuiltVoiceConfig: { voiceName: 'Kore' } // Kore is a warm, clear voice
+                            }
+                        }
+                    }
+                });
+
+                const base64Audio = ttsResponse.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
+                if (base64Audio) {
+                    const audioBlob = b64toBlob(base64Audio, 'audio/pcm');
+                    const audioUrl = URL.createObjectURL(audioBlob);
+                    
+                    // We need to wrap PCM in a WAV header or use AudioContext for playback
+                    // For simplicity in this demo, we'll use a helper to play PCM
+                    playPCM(base64Audio);
+                }
+
+                loading.style.display = 'none';
+                result.style.display = 'block';
+                generateBtn.disabled = false;
+
+            } catch (error) {
+                console.error("Error generating broadcast:", error);
+                alert("Something went wrong. Please try again.");
+                loading.style.display = 'none';
+                generateBtn.disabled = false;
+            }
+        });
+
+        // Helper to convert base64 to Blob
+        function b64toBlob(b64Data, contentType = '', sliceSize = 512) {
+            const byteCharacters = atob(b64Data);
+            const byteArrays = [];
+            for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+                const slice = byteCharacters.slice(offset, offset + sliceSize);
+                const byteNumbers = new Array(slice.length);
+                for (let i = 0; i < slice.length; i++) {
+                    byteNumbers[i] = slice.charCodeAt(i);
+                }
+                const byteArray = new Uint8Array(byteNumbers);
+                byteArrays.push(byteArray);
+            }
+            return new Blob(byteArrays, { type: contentType });
+        }
+
+        // Helper to play raw PCM audio from Gemini TTS
+        async function playPCM(base64Data) {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 24000 });
+            const binaryString = atob(base64Data);
+            const len = binaryString.length;
+            const bytes = new Int16Array(len / 2);
+            for (let i = 0; i < len; i += 2) {
+                bytes[i / 2] = (binaryString.charCodeAt(i + 1) << 8) | binaryString.charCodeAt(i);
+            }
+            
+            const audioBuffer = audioContext.createBuffer(1, bytes.length, 24000);
+            const channelData = audioBuffer.getChannelData(0);
+            for (let i = 0; i < bytes.length; i++) {
+                channelData[i] = bytes[i] / 32768;
+            }
+
+            const source = audioContext.createBufferSource();
+            source.buffer = audioBuffer;
+            source.connect(audioContext.destination);
+            source.start();
+
+            // Update UI to show it's playing
+            audioPlayer.onplay = () => { /* Logic if needed */ };
+        }
+    </script>
+</body>
+</html>
